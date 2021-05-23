@@ -1,9 +1,7 @@
 package edu.iis.mto.blog.domain.repository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 import java.util.List;
 
@@ -36,7 +34,7 @@ class UserRepositoryTest {
         user.setAccountStatus(AccountStatus.NEW);
     }
 
-    @Disabled
+
     @Test
     void shouldFindNoUsersIfRepositoryIsEmpty() {
 
@@ -45,7 +43,7 @@ class UserRepositoryTest {
         assertThat(users, hasSize(0));
     }
 
-    @Disabled
+
     @Test
     void shouldFindOneUsersIfRepositoryContainsOneUserEntity() {
         User persistedUser = entityManager.persist(user);
@@ -57,7 +55,7 @@ class UserRepositoryTest {
                 equalTo(persistedUser.getEmail()));
     }
 
-    @Disabled
+
     @Test
     void shouldStoreANewUser() {
 
@@ -65,5 +63,15 @@ class UserRepositoryTest {
 
         assertThat(persistedUser.getId(), notNullValue());
     }
+
+    @Test
+    void shouldFindUserByPartOfName(){
+        repository.save(user);
+        List<User> testSearchUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase(user.getFirstName().substring(0, 1), "tempLastname", "tempEmail");
+        assertThat(testSearchUsers.size(), is(1));
+        assertThat(true, is(testSearchUsers.get(0).equals(user)));
+    }
+
+
 
 }
