@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import edu.iis.mto.blog.domain.model.AccountStatus;
 import edu.iis.mto.blog.domain.model.User;
+import org.springframework.cache.support.NullValue;
 
 @DataJpaTest
 class UserRepositoryTest {
@@ -72,6 +73,43 @@ class UserRepositoryTest {
         assertThat(true, is(testSearchUsers.get(0).equals(user)));
     }
 
+    @Test
+    void shouldNotFindAnyUser(){
+        repository.save(user);
+        List<User> foundUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("random", "random", "random");
+        assertThat(true, is(foundUsers.isEmpty()));
+    }
 
+    @Test
+    void shouldFindUserByPartOfLastName(){
+        user.setLastName("Kowalski");
+        repository.save(user);
+        List<User> testSearchUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("username", user.getLastName().substring(0, 2), "tempEmail");
+        assertThat(testSearchUsers.size(), is(1));
+        assertThat(true, is(testSearchUsers.get(0).equals(user)));
+    }
 
+    @Test
+    void shouldFindUserByPartOfEmail(){
+        repository.save(user);
+        User user2 = new User();
+        user2.setFirstName("John");
+        user2.setEmail("john@interia.com");
+        user2.setAccountStatus(AccountStatus.NEW);
+        repository.save(user2);
+        List<User> testSearchUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("tempName", "tempLastname", "john");
+        assertThat(testSearchUsers.size(), is(2));
+    }
+
+    @Test
+    void shouldFindAllUsers(){
+        repository.save(user);
+        User user2 = new User();
+        user2.setFirstName("Piotr");
+        user2.setEmail("piotr@interia.com");
+        user2.setAccountStatus(AccountStatus.NEW);
+        repository.save(user2);
+        List<User> testSearchUsers = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase("", "", "");
+        assertThat(testSearchUsers.size(), is(2));
+    }
 }
